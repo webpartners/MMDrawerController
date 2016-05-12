@@ -357,7 +357,7 @@
             break;
         }
         case MMDrawerSectionShadowToggle:{
-            [self.mm_drawerController setShowsShadow:!self.mm_drawerController.showsShadow];
+            [self.mm_drawerController setShowsShadowLeftMenu:!self.mm_drawerController.showsShadow];
             [tableView reloadSections:[NSIndexSet indexSetWithIndex:indexPath.section] withRowAnimation:UITableViewRowAnimationNone];
             break;
         }

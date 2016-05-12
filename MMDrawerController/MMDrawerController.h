@@ -194,6 +194,14 @@ typedef void (^MMDrawerControllerDrawerVisualStateBlock)(MMDrawerController * dr
 @property (nonatomic, assign) MMDrawerOpenCenterInteractionMode centerHiddenInteractionMode;
 
 /**
+ The flag determining if a shadow should be drawn off of `leftViewController` when a drawer is open.
+ 
+ By default, this is set to YES.
+ */
+@property (nonatomic, assign) BOOL showsShadowLeftMenu;
+
+
+/**
  The flag determining if a shadow should be drawn off of `centerViewController` when a drawer is open. 
  
  By default, this is set to YES.

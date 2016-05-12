@@ -436,6 +436,8 @@ static NSString *MMDrawerOpenSideKey = @"MMDrawerOpenSide";
     [self.childControllerContainerView bringSubviewToFront:self.centerContainerView];
     [self.centerViewController.view setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
     [self updateShadowForCenterView];
+    [self updateShadowForLeftView];
+
     
     if(animated == NO){
         // If drawer is offscreen, then viewWillAppear: will take care of this
@@ -728,6 +730,8 @@ static NSString *MMDrawerOpenSideKey = @"MMDrawerOpenSide";
 -(void)viewDidAppear:(BOOL)animated{
     [super viewDidAppear:animated];
     [self updateShadowForCenterView];
+    [self updateShadowForLeftView];
+
     [self.centerViewController endAppearanceTransition];
     
     if(self.openSide == MMDrawerSideLeft) {
@@ -892,6 +896,11 @@ static NSString *MMDrawerOpenSideKey = @"MMDrawerOpenSide";
     _showsShadow = showsShadow;
     [self updateShadowForCenterView];
 }
+-(void) setShowsShadowLeftMenu:(BOOL)showsShadowLeftMenu{
+    _showsShadowLeftMenu = showsShadowLeftMenu;
+    [self updateShadowForLeftView];
+}
+
 
 - (void)setShadowRadius:(CGFloat)shadowRadius{
     _shadowRadius = shadowRadius;
@@ -1301,34 +1310,43 @@ static inline CGFloat originXForDrawerOriginAndTargetOriginOffset(CGFloat origin
 }
 
 -(void)updateShadowForCenterView{
-    UIView * centerView = self.centerContainerView;
-    if(self.showsShadow){
-        centerView.layer.masksToBounds = NO;
-        centerView.layer.shadowRadius = self.shadowRadius;
-        centerView.layer.shadowOpacity = self.shadowOpacity;
-        centerView.layer.shadowOffset = self.shadowOffset;
-        centerView.layer.shadowColor = [self.shadowColor CGColor];
+    [self updateShadowForView:self.centerContainerView shouldShow:self.showsShadow];
+}
+-(void)updateShadowForLeftView{
+    [self updateShadowForView:self.leftDrawerViewController.view shouldShow:self.showsShadowLeftMenu];
+    self.leftDrawerViewController.view.layer.zPosition = 1000;
+}
+
+
+-(void)updateShadowForView:(UIView*) view shouldShow:(bool) shouldShow{
+    if(shouldShow){
+        view.layer.masksToBounds = NO;
+        view.layer.shadowRadius = self.shadowRadius;
+        view.layer.shadowOpacity = self.shadowOpacity;
+        view.layer.shadowOffset = self.shadowOffset;
+        view.layer.shadowColor = [self.shadowColor CGColor];
         
         /** In the event this gets called a lot, we won't update the shadowPath
-        unless it needs to be updated (like during rotation) */
-        if (centerView.layer.shadowPath == NULL) {
-            centerView.layer.shadowPath = [[UIBezierPath bezierPathWithRect:self.centerContainerView.bounds] CGPath];
+         unless it needs to be updated (like during rotation) */
+        if (view.layer.shadowPath == NULL) {
+            view.layer.shadowPath = [[UIBezierPath bezierPathWithRect:view.bounds] CGPath];
         }
         else{
-            CGRect currentPath = CGPathGetPathBoundingBox(centerView.layer.shadowPath);
-            if (CGRectEqualToRect(currentPath, centerView.bounds) == NO){
-                centerView.layer.shadowPath = [[UIBezierPath bezierPathWithRect:self.centerContainerView.bounds] CGPath];
+            CGRect currentPath = CGPathGetPathBoundingBox(view.layer.shadowPath);
+            if (CGRectEqualToRect(currentPath, view.bounds) == NO){
+                view.layer.shadowPath = [[UIBezierPath bezierPathWithRect:self.centerContainerView.bounds] CGPath];
             }
         }
     }
-    else if (centerView.layer.shadowPath != NULL) {
-        centerView.layer.shadowRadius = 0.f;
-        centerView.layer.shadowOpacity = 0.f;
-        centerView.layer.shadowOffset = CGSizeMake(0, -3);
-        centerView.layer.shadowPath = NULL;
-        centerView.layer.masksToBounds = YES;
+    else if (view.layer.shadowPath != NULL) {
+        view.layer.shadowRadius = 0.f;
+        view.layer.shadowOpacity = 0.f;
+        view.layer.shadowOffset = CGSizeMake(0, -3);
+        view.layer.shadowPath = NULL;
+        view.layer.masksToBounds = YES;
     }
 }
+
 
 -(NSTimeInterval)animationDurationForAnimationDistance:(CGFloat)distance{
     NSTimeInterval duration = MAX(distance/self.animationVelocity,MMDrawerMinimumAnimationDuration);
